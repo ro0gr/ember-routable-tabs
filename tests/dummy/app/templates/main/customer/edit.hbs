@@ -1,0 +1,15 @@
+<form>
+  <div>
+    <label for="customer-name">Name:</label>
+    <input
+      id="customer-name"
+      value={{model.customer.name}}
+      oninput={{action (mut model.customer.name) value="target.value"}}
+      />
+  </div>
+
+  <button>Save</button>
+  {{#link-to "main.customer" model.customer.customerId}}Back{{/link-to}}
+</form>
+
+{{outlet}}

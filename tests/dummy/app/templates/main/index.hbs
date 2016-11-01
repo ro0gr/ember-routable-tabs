@@ -1,0 +1,14 @@
+<h3>Dashboard</h3>
+
+<table>
+  {{#each model as |item|}}
+    <tr>
+      <td>
+        {{item.name}}
+      </td>
+      <td>
+         {{#link-to "main.customer" item.customerId}}Customer{{/link-to}}
+      </td>
+    </tr>
+  {{/each}}
+</table>

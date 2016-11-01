@@ -1,0 +1,11 @@
+<ul>
+  {{#each tabs as |tab|}}
+    <li>
+      {{#link-to params=tab.routeParams}}{{tab.title}}{{/link-to}}
+    </li>
+  {{/each}}
+</ul>
+
+<div class="tabs-content">
+  {{outlet}}
+</div>
