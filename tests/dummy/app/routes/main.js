@@ -1,6 +1,7 @@
 import Ember from 'ember';
 
 const {
+  isEmpty,
   assign,
   set,
   get,
@@ -14,19 +15,6 @@ const activities = [{
 }, {
   name: "activity 3", customerId: 3
 }];
-
-/*
- * Looks up for a title in handler infos in reverse order.
- * Search continues until a title is found in controller or route handler
- *
- * @param {array} handlerInfos
- * @return {string} found title or undefined
- */
-function findTitle(handlerInfos) {
-  return handlerInfos.slice().reverse()
-    .map(hi => get(hi.handler, 'title') || get(hi.handler.controller, 'title'))
-    .find((title) => !!title);
-}
 
 /**
  * Build route params for tab from handlerInfos
@@ -51,11 +39,29 @@ function buildUrlParams(handlerInfos) {
     return urlParams;
 }
 
+function extractTabSettings(routeHandler) {
+    let tab = get(routeHandler._handler, 'tab');
+
+    return typeof tab === 'function' ?
+      tab.call(routeHandler, routeHandler.context) :
+      tab;
+}
+
 function fromHandlerInfos(handlerInfos) {
-  return {
-    title: findTitle(handlerInfos),
-    params: buildUrlParams(handlerInfos)
-  };
+  // merge tab settings form all the route handlers
+  let tabSettingsList = handlerInfos.map(extractTabSettings)
+      .filter(tab => !isEmpty(tab))
+      .map(tab => JSON.parse(JSON.stringify(tab)));
+
+  if (!tabSettingsList.length) {
+    throw new Error("tab settings not found for", handlerInfos[handlerInfos.length - 1].name);
+  }
+
+  let tab = assign.apply(null, tabSettingsList);
+
+  tab.params = buildUrlParams(handlerInfos);
+
+  return tab;
 }
 
 export default Ember.Route.extend({
@@ -72,24 +78,23 @@ export default Ember.Route.extend({
     this._super(...arguments);
 
     let tabs = this.get('tabs').containerFor(this.routeName);
-
-    controller.title = 'Main';
-
-    tabs.assignTab({
-      title: 'Main',
-      params: ['main.index']
-    });
-
     set(this.controller, 'tabs', tabs);
   },
 
   actions: {
     didTransition() {
-      let tabs = get(this, 'tabs').containerFor(this.routeName);
+      let tabs = get(this.controller, 'tabs');
 
-      tabs.assignTab(
-        fromHandlerInfos(this.router.router.currentHandlerInfos)
-      );
+      if (tabs.isEmpty()) {
+        tabs.assignTab({
+          title: 'Main',
+          params: ['main.index']
+        });
+      } else {
+        tabs.assignTab(
+          fromHandlerInfos(this.router.router.currentHandlerInfos)
+        );
+      }
 
       return true;
     }

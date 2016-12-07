@@ -1,6 +1,12 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
+  tab({ customer }) {
+    return {
+      title: `Customer ${customer.name}`
+    };
+  },
+
   model({customerId}) {
     let customer = {
       customerId: customerId.toString(),
@@ -17,12 +23,5 @@ export default Ember.Route.extend({
       }],
       customer
     };
-  },
-
-  setupController(c, m) {
-    this._super(...arguments);
-    let { customer } = m;
-
-    c.title = `Customer ${customer.name}`;
   }
 });
