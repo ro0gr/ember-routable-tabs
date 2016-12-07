@@ -7,7 +7,12 @@
         {{item.name}}
       </td>
       <td>
-         {{#link-to "main.customer" item.customerId}}Customer{{/link-to}}
+        {{#link-to "main.customer" item.customerId
+          class="main--customer-link"
+          id=(concat "customer-link-" item.customerId)
+        }}
+          Customer
+        {{/link-to}}
       </td>
     </tr>
   {{/each}}

@@ -5,7 +5,8 @@ export default Ember.Route.extend({
     let customer = {
       customerId: customerId.toString(),
       name: "customer" + customerId.toString()
-    }
+    };
+
     return {
       genders: [{
         id: 1,
@@ -15,13 +16,13 @@ export default Ember.Route.extend({
         name: 'female'
       }],
       customer
-    }
+    };
   },
 
   setupController(c, m) {
     this._super(...arguments);
     let { customer } = m;
 
-    c.title = `Customer ${customer.name}`
+    c.title = `Customer ${customer.name}`;
   }
 });

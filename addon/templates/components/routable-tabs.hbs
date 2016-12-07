@@ -1,7 +1,7 @@
 <ul>
   {{#each tabs as |tab|}}
-    <li>
-      {{#link-to params=tab.routeParams}}{{tab.title}}{{/link-to}}
+    <li class="{{blockName}}--tab-handle">
+      {{#link-to params=tab.params}}{{tab.title}}{{/link-to}}
     </li>
   {{/each}}
 </ul>
