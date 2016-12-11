@@ -1,8 +1,14 @@
-<dl>
-  <dt>Name:</dt>
-  <dd>{{model.customer.name}}</dd>
+<dl class="customer-property-list">
+  <dt class="customer-property-label">Name:</dt>
+  <dd class="customer-property customer-property-name">
+    {{model.customer.name}}
+  </dd>
 </dl>
 
-{{#link-to "main.customer.edit" model.customer.customerId}}Edit{{/link-to}}
+{{#link-to "main.customer.edit" model.customer.customerId
+  class="customer-edit-link"
+}}
+  Edit
+{{/link-to}}
 
 {{outlet}}

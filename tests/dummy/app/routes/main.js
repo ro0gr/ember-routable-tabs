@@ -20,23 +20,19 @@ const activities = [{
  * Build route params for tab from handlerInfos
  *
  * @param {array} handlerInfos
- * @return [routeName, routeModel?] Tab params
+ * @return [routeName, paramValue1, paramValue2,...] url params
  */
 function buildUrlParams(handlerInfos) {
+    let routeParams = handlerInfos.reduce((prev, current) => {
+      let paramNames = get(current, '_names');
+      let paramValues = paramNames.map(name => current.params[name])
+
+      return prev.concat(paramValues);
+    }, []);
+
     let [lastSegment] = handlerInfos.slice(-1);
-    let urlParams = [lastSegment.name];
 
-    let routeParams = assign.apply(null, handlerInfos.map(hi => {
-      return JSON.parse(JSON.stringify(hi.params));
-    }));
-
-    let hasRouteParams = Object.keys(routeParams).length > 0;
-
-    if (hasRouteParams) {
-      urlParams.push(assign(lastSegment.context, routeParams));
-    }
-
-    return urlParams;
+    return [lastSegment.name].concat(routeParams);
 }
 
 function extractTabSettings(routeHandler) {
@@ -68,6 +64,10 @@ export default Ember.Route.extend({
   tabs: service(),
   // tabs: routableTabs(),
 
+  tab: {
+    title: 'Main'
+  },
+
   model() {
     return new Ember.RSVP.Promise((r) => {
       r(activities);
@@ -78,23 +78,21 @@ export default Ember.Route.extend({
     this._super(...arguments);
 
     let tabs = this.get('tabs').containerFor(this.routeName);
-    set(this.controller, 'tabs', tabs);
+    tabs.assignTab({
+      title: 'Main',
+      params: ['main.index']
+    });
+
+    set(controller, 'tabs', tabs);
   },
 
   actions: {
     didTransition() {
       let tabs = get(this.controller, 'tabs');
 
-      if (tabs.isEmpty()) {
-        tabs.assignTab({
-          title: 'Main',
-          params: ['main.index']
-        });
-      } else {
-        tabs.assignTab(
-          fromHandlerInfos(this.router.router.currentHandlerInfos)
-        );
-      }
+      tabs.assignTab(
+        fromHandlerInfos(this.router.router.currentHandlerInfos)
+      );
 
       return true;
     }

@@ -8,8 +8,13 @@
       />
   </div>
 
-  <button>Save</button>
-  {{#link-to "main.customer" model.customer.customerId}}Back{{/link-to}}
+  <button class="save-button">Save</button>
+
+  {{#link-to "main.customer" model.customer.customerId
+    class="back-link"
+  }}
+    Back
+  {{/link-to}}
 </form>
 
 {{outlet}}

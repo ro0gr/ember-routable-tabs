@@ -7,5 +7,9 @@
 </ul>
 
 <div class="tabs-content">
-  {{outlet}}
+  {{#if hasBlock}}
+    {{yield}}
+  {{else}}
+    {{outlet}}
+  {{/if}}
 </div>

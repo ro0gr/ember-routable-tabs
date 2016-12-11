@@ -3,7 +3,7 @@ import Ember from 'ember';
 export default Ember.Route.extend({
   tab({ customer }) {
     return {
-      title: `Customer ${customer.name}`
+      title: `${customer.name}`
     };
   },
 

@@ -14,16 +14,11 @@ export default ArrayProxy.extend({
   assignTab(tab) {
     let existingTab = this.findByParams(tab.params);
     if (!existingTab) {
-      existingTab = this.add(tab);
+      this.addObject(tab);
+      existingTab = tab;
     } else {
       setProperties(existingTab, tab);
     }
-  },
-
-  add(tab) {
-    this.addObject(tab);
-
-    return tab;
   },
 
   findByParams(params = []) {
@@ -37,6 +32,5 @@ export default ArrayProxy.extend({
     } else {
       return this.find((currentTab) => currentTab.params[0] === routeName);
     }
-
   }
 });
