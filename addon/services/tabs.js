@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import TabsContainer from 'ember-routable-tabs/models/tabs-container';
 
-const { A } = Ember;
+const { A, setOwner, getOwner } = Ember;
 
 export default Ember.Service.extend({
   init() {
@@ -13,6 +13,8 @@ export default Ember.Service.extend({
       this._items[containerId] = TabsContainer.create({
         content: A([])
       });
+      let owner = getOwner(this);
+      setOwner(this._items[containerId], owner);
     }
     return this._items[containerId];
   }

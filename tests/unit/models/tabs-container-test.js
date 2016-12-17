@@ -13,3 +13,14 @@ test('Init with one item', function(assert) {
   assert.notOk(model.isEmpty(), 'is not empty');
 });
 
+test('findByParams', function(assert) {
+  let expectedTab = {
+    id: 1,
+    params: ['tab1']
+  };
+
+  let model = TabsContainer.create({ content: [expectedTab] });
+
+  assert.deepEqual(model.findByParams(['tab1']), expectedTab);
+});
+
