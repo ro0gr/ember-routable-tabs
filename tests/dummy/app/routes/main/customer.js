@@ -7,7 +7,11 @@ export default Ember.Route.extend({
     };
   },
 
-  model({customerId}) {
+  model({ customerId }) {
+    if (customerId === 'fail') {
+      throw new Error("fail");
+    }
+
     let customer = {
       customerId: customerId.toString(),
       name: "customer" + customerId.toString()

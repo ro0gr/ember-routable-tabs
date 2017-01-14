@@ -21,12 +21,20 @@ export default ArrayProxy.extend({
     let incomingInfos;
 
     if (!tab) {
-      incomingInfos = get(this, 'router').activeTransition.handlerInfos;
+      incomingInfos = get(this, 'router').currentHandlerInfos;
+      // incomingInfos = get(this, 'router').activeTransition.handlerInfos;
+      tab = assign({
+        routeName: leafName(incomingInfos),
+        params: getParamsHash(incomingInfos)
+      }, extractTabSettingsFromHandlerInfos(incomingInfos));
     } else {
       incomingInfos = this._recognize(tab);
     }
 
-    tab = fromHandlerInfos(incomingInfos);
+
+
+
+
     let existingTab = this.findOpened(incomingInfos);
 
     if (!existingTab) {
@@ -81,26 +89,15 @@ function leafName(handlerInfos) {
     return handlerInfos.slice(-1).name;
 }
 
-function extractTabSettings(routeHandler) {
+function extractTabSettingsFromHandlerInfos(handlerInfos) {
+  return handlerInfos.map((routeHandler) => {
     let tab = get(routeHandler._handler, 'tab');
 
-    return typeof tab === 'function' ?  tab.call(routeHandler, routeHandler.context) : tab;
-}
-
-function fromHandlerInfos(handlerInfos) {
-  // merge tab settings form all the route handlers
-  let tabSettingsList = handlerInfos.map(extractTabSettings)
-      .filter(tab => !isEmpty(tab))
-      .map(tab => JSON.parse(JSON.stringify(tab)));
-
-  if (!tabSettingsList.length) {
-    throw new Error("tab settings not found for", handlerInfos[handlerInfos.length - 1].name);
-  }
-
-  let tab = assign.apply(null, tabSettingsList);
-  tab.routeName = leafName(handlerInfos);
-  tab.params = getParamsHash(handlerInfos);
-
-  return tab;
+    return typeof tab === 'function' ?
+      tab.call(routeHandler, routeHandler.context) :
+      tab;
+  })
+  .filter(tab => !isEmpty(tab))
+  .map(tab => JSON.parse(JSON.stringify(tab)));
 }
 

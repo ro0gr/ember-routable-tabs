@@ -70,6 +70,12 @@ test('visiting /customer/1', function(assert) {
   ]));
 });
 
+test('visiting /customer/fail', function(assert) {
+  customerPage.visit({ id: 'fail' });
+
+  return andThen(() => pauseTest());
+});
+
 test('click on customer link', function(assert) {
   mainPage.visit('/').customers(0).click();
 

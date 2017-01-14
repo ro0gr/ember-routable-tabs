@@ -24,3 +24,72 @@ test('findByParams', function(assert) {
   assert.deepEqual(model.findByParams(['tab1']), expectedTab);
 });
 
+test('recognize tab', function(assert) {
+  let recognizer = {
+    generate(routeName, params) {
+      if (routeName === 'main.index') {
+        return '/';
+      }
+    },
+
+    recognize(url) {
+      if (url === '/') {
+        return [
+          { "handler":"application", "params":{}, "isDynamic":false },
+          { "handler":"main", "params":{}, "isDynamic":false },
+          { "handler":"main.index", "params":{}, "isDynamic":false }
+        ];
+      }
+    }
+  };
+
+  let subject = TabsContainer.create({
+    router: { recognizer },
+    content: []
+  });
+
+  let mainResult = subject._recognize({
+    title: "Main",
+    routeName: "main.index"
+  });
+  assert.deepEqual(mainResult.map(n => n.name), ['application', 'main', 'main.index']);
+});
+
+test('recognize tab with dynamic param', function(assert) {
+  let recognizer = {
+    generate(routeName) {
+      if (routeName === 'main.customer') {
+        return 'customer/1';
+      }
+    },
+
+    recognize(url) {
+      if (url === 'customer/1') {
+        return [
+          { "handler":"application", "params":{}, "isDynamic":false },
+          { "handler":"main", "params":{}, "isDynamic":false },
+          { "handler":"main.customer", "params":{customerId: 1}, "isDynamic": true },
+          { "handler":"main.customer.index", "params":{}, "isDynamic":false }
+        ];
+      }
+    }
+  };
+
+  let subject = TabsContainer.create({
+    router: { recognizer },
+    content: []
+  });
+
+  let customerResult = subject._recognize({
+    title: "Customer",
+    routeName: "main.customer"
+  });
+
+  assert.deepEqual(customerResult.map(n => n.name), [
+    'application', 'main', 'main.customer', 'main.customer.index'
+  ]);
+
+  assert.deepEqual(customerResult.map(n => n.params), [
+    {}, {}, {customerId: 1}, {}
+  ]);
+});
