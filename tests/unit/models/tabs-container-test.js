@@ -1,4 +1,4 @@
-import { moduleFor, test } from 'ember-qunit';
+import { moduleFor, test, skip } from 'ember-qunit';
 import TabsContainer from 'ember-routable-tabs/models/tabs-container';
 
 moduleFor('model:tabs-container', 'Unit | Model | tabs container');
@@ -13,7 +13,7 @@ test('Init with one item', function(assert) {
   assert.notOk(model.isEmpty(), 'is not empty');
 });
 
-test('findByParams', function(assert) {
+skip('findByParams', function(assert) {
   let expectedTab = {
     id: 1,
     params: ['tab1']
@@ -26,7 +26,7 @@ test('findByParams', function(assert) {
 
 test('recognize tab', function(assert) {
   let recognizer = {
-    generate(routeName, params) {
+    generate(routeName) {
       if (routeName === 'main.index') {
         return '/';
       }

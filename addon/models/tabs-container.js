@@ -7,7 +7,8 @@ const {
   ArrayProxy,
   get,
   setProperties,
-  inject: { service }
+  inject: { service },
+  getOwner
 } = Ember;
 
 export default ArrayProxy.extend({
@@ -18,28 +19,23 @@ export default ArrayProxy.extend({
   }),
 
   assignTab(tab) {
-    let incomingInfos;
-
     if (!tab) {
-      incomingInfos = get(this, 'router').currentHandlerInfos;
-      // incomingInfos = get(this, 'router').activeTransition.handlerInfos;
-      tab = assign({
-        routeName: leafName(incomingInfos),
-        params: getParamsHash(incomingInfos)
-      }, extractTabSettingsFromHandlerInfos(incomingInfos));
-    } else {
-      incomingInfos = this._recognize(tab);
+      let currentInfos = get(this, 'router').currentHandlerInfos;
+      tab = {
+        routeName: leafName(currentInfos),
+        params: getParamsHash(currentInfos)
+      };
     }
 
+    let incomingInfos = this._recognize(tab);
+    assign(tab, extractTabSettingsFromHandlerInfos.call(this, incomingInfos));
 
-
-
+    tab.linkParams = [tab.routeName].concat(getParamsValues(incomingInfos));
 
     let existingTab = this.findOpened(incomingInfos);
 
     if (!existingTab) {
       this.addObject(tab);
-      existingTab = tab;
     } else {
       setProperties(existingTab, tab);
     }
@@ -57,15 +53,9 @@ export default ArrayProxy.extend({
   },
 
   findOpened(incomingInfos) {
-    return this.map(this._recognize.bind(this))
-      .find(infos => this.haveSimilarRoot(infos, incomingInfos));
-  },
-
-  haveSimilarRoot(handlerInfos1, handlerInfos2) {
-    let lastHI1 = handlerInfos1[handlerInfos1.length - 1];
-    let lastHI2 = handlerInfos2[handlerInfos2.length - 1];
-
-    return lastHI1.handler === lastHI2.handler;
+    return this.find(
+      tab => haveSimilarRoot(incomingInfos, this._recognize(tab))
+    );
   },
 
   isEmpty() {
@@ -73,31 +63,75 @@ export default ArrayProxy.extend({
   }
 });
 
-function getParamNames(handlerInfos) {
-    return handlerInfos.reduce((prev, current) => {
-      return prev.concat(get(current, '_names'));
-    }, []);
+function lastIndexWithParams(handlerInfos) {
+  let i = -1;
+
+  handlerInfos.forEach((hi, pos) => {
+    if (!Ember.isEmpty(hi.params)) {
+      i = pos;
+    }
+  });
+
+  return i;
+}
+
+function haveSimilarRoot(handlerInfos1, handlerInfos2) {
+  let lastIndexWithParams1 = lastIndexWithParams(handlerInfos1),
+    lastIndexWithParams2 = lastIndexWithParams(handlerInfos2);
+
+  if (lastIndexWithParams1 !== lastIndexWithParams2) {
+    return false;
+  }
+
+  for (let i = 0; i < lastIndexWithParams1; i++) {
+    if (handlerInfos1[i].handler !== handlerInfos2[i].handler) {
+      return false;
+    }
+
+    if (JSON.stringify(handlerInfos1[i].params) !== JSON.stringify(handlerInfos2[i].params)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function getParamsHash(handlerInfos) {
-    return assign.apply(null, handlerInfos.map(hi => {
-      return JSON.parse(JSON.stringify(hi.params));
-    }));
+  return assign.apply(null, getParams(handlerInfos));
 }
 
+function getParamsValues(handlerInfos) {
+    return Array.prototype.concat.apply(
+      [],
+      getParams(handlerInfos).map(segmentParams => {
+        return Object.values(segmentParams);
+      })
+    );
+}
+
+function getParams(handlerInfos) {
+    return handlerInfos.map(hi => {
+      return JSON.parse(JSON.stringify(hi.params));
+    });
+}
+
+
 function leafName(handlerInfos) {
-    return handlerInfos.slice(-1).name;
+    return handlerInfos.slice(-1)[0].name;
 }
 
 function extractTabSettingsFromHandlerInfos(handlerInfos) {
-  return handlerInfos.map((routeHandler) => {
-    let tab = get(routeHandler._handler, 'tab');
+  const owner = getOwner(this);
+  let settingsPerTab = handlerInfos.map((routeHandler) => {
+      let handler = owner.lookup(`route:${routeHandler.handler}`);
+      let tab = get(handler, 'tab');
 
-    return typeof tab === 'function' ?
-      tab.call(routeHandler, routeHandler.context) :
-      tab;
-  })
-  .filter(tab => !isEmpty(tab))
-  .map(tab => JSON.parse(JSON.stringify(tab)));
+      return typeof tab === 'function' ?
+        tab.call(routeHandler, handler.context) :
+        tab;
+    })
+    .filter(tab => !isEmpty(tab))
+    .map(tab => JSON.parse(JSON.stringify(tab)));
+
+  return assign.apply(this, [{}].concat(settingsPerTab));
 }
-
