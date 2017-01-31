@@ -115,7 +115,6 @@ function getParams(handlerInfos) {
     });
 }
 
-
 function leafName(handlerInfos) {
     return handlerInfos.slice(-1)[0].name;
 }

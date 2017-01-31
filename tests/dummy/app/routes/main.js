@@ -3,7 +3,8 @@ import Ember from 'ember';
 const {
   set,
   get,
-  inject: { service }
+  getOwner,
+  computed
 } = Ember;
 
 const activities = [{
@@ -14,39 +15,35 @@ const activities = [{
   name: "activity 3", customerId: 3
 }];
 
-export default Ember.Route.extend({
-  tabs: service(),
+function routableTabs() {
+  return computed(function() {
+    return getOwner(this)
+      .lookup('service:tabs')
+      .containerFor(this.routeName);
+  })
+}
 
-  tab: {
-    title: 'Main'
-  },
+export default Ember.Route.extend({
+  tabs: routableTabs(),
 
   model() {
-    return new Ember.RSVP.Promise((r) => {
-      r(activities);
-    });
+    return activities;
   },
 
   setupController(controller) {
     this._super(...arguments);
 
-    const tabs = get(this, 'tabs')
-      .containerFor(this.routeName)
+    set(controller, 'tabs', get(this, 'tabs'));
 
-    tabs.assignTab({
+    get(this, 'tabs').assignTab({
       title: 'Main',
-      routeName: 'main.index'
+      routeName: this.routeName
     });
-
-    set(controller, 'tabs', tabs);
   },
 
   actions: {
     didTransition() {
-      get(this.controller, 'tabs').assignTab();
-
-      return true;
+      get(this, 'tabs').assignTab()
     }
   }
 });
-
