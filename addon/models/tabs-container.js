@@ -7,9 +7,10 @@ const {
   ArrayProxy,
   get,
   setProperties,
-  inject: { service },
   getOwner
 } = Ember;
+
+const { service } = Ember.inject;
 
 export default ArrayProxy.extend({
   routing: service('-routing'),
@@ -102,8 +103,7 @@ function getParamsHash(handlerInfos) {
 
 function getParamsValues(handlerInfos) {
     return Array.prototype.concat.apply(
-      [],
-      getParams(handlerInfos).map(segmentParams => {
+      [], getParams(handlerInfos).map(segmentParams => {
         return Object.values(segmentParams);
       })
     );
@@ -119,16 +119,20 @@ function leafName(handlerInfos) {
     return handlerInfos.slice(-1)[0].name;
 }
 
+function readTabSettingsFromRouteHandler(routeHandler) {
+  let tab = get(routeHandler, 'tab');
+
+  return typeof tab === 'function' ?
+    tab.call(routeHandler, routeHandler.context) :
+    tab;
+}
+
 function extractTabSettingsFromHandlerInfos(handlerInfos) {
   const owner = getOwner(this);
-  let settingsPerTab = handlerInfos.map((routeHandler) => {
-      let handler = owner.lookup(`route:${routeHandler.handler}`);
-      let tab = get(handler, 'tab');
 
-      return typeof tab === 'function' ?
-        tab.call(routeHandler, handler.context) :
-        tab;
-    })
+  let settingsPerTab = handlerInfos
+    .map((routeHandler) => owner.lookup(`route:${routeHandler.handler}`))
+    .map(readTabSettingsFromRouteHandler)
     .filter(tab => !isEmpty(tab))
     .map(tab => JSON.parse(JSON.stringify(tab)));
 
