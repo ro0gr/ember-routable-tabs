@@ -1,0 +1,7 @@
+{{#link-to params=tab.linkParams}}
+  {{#if hasBlock}}
+    {{yield tab}}
+  {{else}}
+    {{tab.title}}
+  {{/if}}
+{{/link-to}}

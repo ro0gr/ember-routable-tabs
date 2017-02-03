@@ -9,16 +9,15 @@ test('it renders', function(assert) {
   // Set any properties with this.set('myProperty', 'value');
   // Handle any actions with this.on('myAction', function(val) { ... });
 
-  this.render(hbs`{{routable-tabs}}`);
-
-  assert.equal(this.$().text().trim(), '');
+  this.tabs = [{
+    linkParams: ['test'],
+    title: 'tab 1'
+  }]
 
   // Template block usage:
   this.render(hbs`
-    {{#routable-tabs}}
-      template block text
-    {{/routable-tabs}}
+    {{routable-tabs tabs=tabs}}
   `);
 
-  assert.equal(this.$().text().trim(), 'template block text');
+  assert.equal(this.$().text().trim(), 'tab 1');
 });

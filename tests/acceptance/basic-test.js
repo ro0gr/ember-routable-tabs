@@ -16,10 +16,10 @@ let mainPage = create({
 
   tabs: collection({
     scope: '.routable-tabs',
-    itemScope: '.routable-tabs--tab-handle',
+    itemScope: '.routable-tabs__tab-item',
     item: {
       title: text(),
-      click: clickable()
+      click: clickable('a')
     }
   }),
 
@@ -80,6 +80,20 @@ test('click on customer link', function(assert) {
   }).then(() => assertTabs(assert, [
     'Main', 'customer1', 'customer2'
   ]));
+});
+
+test('click on a tab', function(assert) {
+  customerPage.visit({id: '1'});
+
+  return andThen(() => assertTabs(assert, [
+    'Main', 'customer1'
+  ])).then(() => {
+    mainPage.tabs(0).click();
+  }).then(() => assertTabs(assert, [
+    'Main', 'customer1'
+  ])).then(() => {
+    assert.equal(currentURL(), '/', 'redirected to main pagekkk');
+  });
 });
 
 test('subroute: go back and forth', function(assert) {

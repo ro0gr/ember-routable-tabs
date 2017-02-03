@@ -6,5 +6,7 @@ export default Ember.Component.extend({
 
   layout,
 
-  blockName: 'routable-tabs'
+  blockName: 'routable-tabs',
+
+  tagName: 'ul'
 });

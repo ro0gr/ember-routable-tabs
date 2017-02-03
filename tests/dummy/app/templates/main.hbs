@@ -1,1 +1,7 @@
-{{routable-tabs tabs=tabs}}
+{{#routable-tabs
+  tabs=tabs as |itemData|
+}}
+  {{itemData.title}}
+{{/routable-tabs}}
+
+{{outlet}}

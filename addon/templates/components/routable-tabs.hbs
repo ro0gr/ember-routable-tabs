@@ -1,15 +1,9 @@
-<ul>
-  {{#each tabs as |tab|}}
-    <li class="{{blockName}}--tab-handle">
-      {{#link-to params=tab.linkParams}}{{tab.title}}{{/link-to}}
-    </li>
-  {{/each}}
-</ul>
-
-<div class="tabs-content">
+{{#each tabs as |tab|}}
   {{#if hasBlock}}
-    {{yield}}
+    {{#routable-tabs/tab-item tab=tab as |tabItem|}}
+      {{yield tab}}
+    {{/routable-tabs/tab-item}}
   {{else}}
-    {{outlet}}
+    {{routable-tabs/tab-item tab=tab}}
   {{/if}}
-</div>
+{{/each}}
