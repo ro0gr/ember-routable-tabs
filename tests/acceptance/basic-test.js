@@ -11,6 +11,20 @@ import {
   clickable
 } from 'ember-cli-page-object';
 
+function assertTabs(assert, expectedList) {
+  let expectedCountMessage = expectedList.length === 1 ?
+    '1 tab item rendered' :
+    `${expectedList.length} tab items rendered`;
+
+  assert.equal(mainPage.tabs().count, expectedList.length, expectedCountMessage);
+
+  expectedList.forEach((expectedItemTitle, pos) => {
+    assert.equal(
+      mainPage.tabs(pos).title, expectedItemTitle, `tab #${pos + 1} is called "${expectedItemTitle}"`
+    );
+  });
+}
+
 let mainPage = create({
   visit: visitable('/'),
 
@@ -58,7 +72,6 @@ moduleForAcceptance('Acceptance | basic');
 
 test('visiting /', function(assert) {
   mainPage.visit();
-
   return andThen(() => assertTabs(assert, ['Main']));
 });
 
@@ -125,18 +138,4 @@ test('should reload tab content on reveisit', function(assert) {
   });
 
 });
-
-function assertTabs(assert, expectedList) {
-  let expectedCountMessage = expectedList.length === 1 ?
-    '1 tab item rendered' :
-    `${expectedList.length} tab items rendered`;
-
-  assert.equal(mainPage.tabs().count, expectedList.length, expectedCountMessage);
-
-  expectedList.forEach((expectedItemTitle, pos) => {
-    assert.equal(
-      mainPage.tabs(pos).title, expectedItemTitle, `tab #${pos + 1} is called "${expectedItemTitle}"`
-    );
-  });
-}
 
