@@ -1,8 +1,6 @@
 {{#each tabs as |tab|}}
   {{#if hasBlock}}
-    {{yield (hash
-		tabItem=(component 'routable-tabs/tab-item' tab=tab) 
-	)}}
+    {{yield (component 'routable-tabs/tab-item' tab=tab) tab}}
   {{else}}
     {{routable-tabs/tab-item tab=tab}}
   {{/if}}

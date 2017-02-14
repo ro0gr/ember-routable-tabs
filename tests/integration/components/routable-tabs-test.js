@@ -73,10 +73,10 @@ test('it renders contextual tab items', function(assert) {
 
   // Template block usage:
   this.render(hbs`
-    {{#routable-tabs tabs=tabs as |c|}}
-		{{#c.tabItem as |d|}}
-			{{d.title}} - {{d.status}}
-		{{/c.tabItem}}
+    {{#routable-tabs tabs=tabs as |c datum|}}
+		{{#component c}}
+			{{datum.title}} - {{datum.status}}
+		{{/component}}
 	{{/routable-tabs}}
   `);
 
