@@ -15,13 +15,13 @@ const { service } = Ember.inject;
 export default ArrayProxy.extend({
   routing: service('-routing'),
 
-  router: computed('routing', function() {
+  _routerMicrolib: computed('routing', function() {
     return this.get('routing').router.router;
   }),
 
   assignTab(tab) {
     if (!tab) {
-      let currentInfos = get(this, 'router').currentHandlerInfos;
+      let currentInfos = get(this, '_routerMicrolib').currentHandlerInfos;
       tab = {
         routeName: leafName(currentInfos),
         params: getParamsHash(currentInfos)
@@ -34,7 +34,6 @@ export default ArrayProxy.extend({
     tab.linkParams = [tab.routeName].concat(getParamsValues(incomingInfos));
 
     let existingTab = this.findOpened(incomingInfos);
-
     if (!existingTab) {
       this.addObject(tab);
     } else {
@@ -42,20 +41,27 @@ export default ArrayProxy.extend({
     }
   },
 
+  detach(tab) {
+	this.removeObject(tab);  
+  },
+  
+  // @todo: test
   _recognize({ routeName, params = null }) {
-    const routeRecognizer = get(this, 'router').recognizer;
+    const routeRecognizer = get(this, '_routerMicrolib').recognizer;
 
-    let url = routeRecognizer.generate(routeName, params)
-
-    let recognized = routeRecognizer.recognize(url)
-    return recognized.slice().map(hi => assign({}, hi, {
-      name: hi.handler
-    }));
+    let url = routeRecognizer.generate(routeName, params);
+    let recognized = routeRecognizer.recognize(url);
+	
+	return recognized.slice().map(
+		hi => assign({}, hi, {
+			name: hi.handler
+		})
+	);
   },
 
   findOpened(incomingInfos) {
     return this.find(
-      tab => haveSimilarRoot(incomingInfos, this._recognize(tab))
+      tab => commonRoot(incomingInfos, this._recognize(tab))
     );
   },
 
@@ -76,7 +82,7 @@ function lastIndexWithParams(handlerInfos) {
   return i;
 }
 
-function haveSimilarRoot(handlerInfos1, handlerInfos2) {
+function commonRoot(handlerInfos1, handlerInfos2) {
   let lastIndexWithParams1 = lastIndexWithParams(handlerInfos1),
     lastIndexWithParams2 = lastIndexWithParams(handlerInfos2);
 
@@ -98,7 +104,7 @@ function haveSimilarRoot(handlerInfos1, handlerInfos2) {
 }
 
 function getParamsHash(handlerInfos) {
-  return assign.apply(null, getParams(handlerInfos));
+	return assign.apply(null, getParams(handlerInfos));
 }
 
 function getParamsValues(handlerInfos) {

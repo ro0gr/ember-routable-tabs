@@ -2,10 +2,10 @@ import Ember from 'ember';
 
 const {
   set,
-  get,
-  getOwner,
-  computed
+  get
 } = Ember;
+
+import routableTabs from '../utils/routable-tabs';
 
 const activities = [{
   name: "activity 1", customerId: 1
@@ -15,16 +15,8 @@ const activities = [{
   name: "activity 3", customerId: 3
 }];
 
-function routableTabs() {
-  return computed(function() {
-    return getOwner(this)
-      .lookup('service:tabs')
-      .containerFor(this.routeName);
-  })
-}
-
 export default Ember.Route.extend({
-  tabs: routableTabs(),
+  tabs: routableTabs('main'),
 
   model() {
     return activities;
