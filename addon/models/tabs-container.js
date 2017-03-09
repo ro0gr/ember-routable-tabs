@@ -13,60 +13,86 @@ const {
 const { service } = Ember.inject;
 
 export default ArrayProxy.extend({
+  name: '',
+
   routing: service('-routing'),
 
   _routerMicrolib: computed('routing', function() {
     return this.get('routing').router.router;
   }),
 
-  assignTab(tab) {
-    if (!tab) {
-      let currentInfos = get(this, '_routerMicrolib').currentHandlerInfos;
-      tab = {
+  _fromCurrent() {
+      const currentInfos = get(this, '_routerMicrolib').currentHandlerInfos;
+
+      return {
         routeName: leafName(currentInfos),
         params: getParamsHash(currentInfos)
       };
+  },
+
+  attach(navItem) {
+    if (!navItem) {
+      navItem = this._fromCurrent();
     }
 
-    let incomingInfos = this._recognize(tab);
-    assign(tab, extractTabSettingsFromHandlerInfos.call(this, incomingInfos));
+    const incomingInfos = this._recognize(navItem);
+    assign(navItem, extractTabSettingsFromHandlerInfos.call(this, incomingInfos), {
+      linkParams: [ navItem.routeName ]
+        .concat(getParamsValues(incomingInfos))
+    });
 
-    tab.linkParams = [tab.routeName].concat(getParamsValues(incomingInfos));
-
-    let existingTab = this.findOpened(incomingInfos);
-    if (!existingTab) {
-      this.addObject(tab);
+    let existing = this.findOpened(incomingInfos);
+    if (!existing) {
+      this.addObject(navItem);
     } else {
-      setProperties(existingTab, tab);
+      // @todo: replace
+      setProperties(existing, navItem);
     }
   },
 
   detach(tab) {
-	this.removeObject(tab);  
+    const router = this.get('_routerMicrolib');
+    const isTabActive = router.isActive.apply(router, tab.linkParams);
+    const pos = this.indexOf(tab);
+
+    this.removeObject(tab);
+
+    if (isTabActive) {
+      let prevTab = this.objectAt(pos > 0 ? pos - 1 : pos);
+      if (prevTab) {
+        router.replaceWith.apply(router, prevTab.linkParams);
+      } else { // all tabs are deleted
+        router.replaceWith([this.name]);
+      }
+    }
   },
-  
+
   // @todo: test
   _recognize({ routeName, params = null }) {
     const routeRecognizer = get(this, '_routerMicrolib').recognizer;
 
-    let url = routeRecognizer.generate(routeName, params);
-    let recognized = routeRecognizer.recognize(url);
-	
-	return recognized.slice().map(
-		hi => assign({}, hi, {
-			name: hi.handler
-		})
-	);
+    const url = routeRecognizer.generate(routeName, params);
+    const recognized = routeRecognizer.recognize(url);
+
+    return recognized.slice().map(
+      hi => assign({}, hi, {
+        name: hi.handler
+      })
+    );
   },
 
+  /**
+   *
+   *
+   * @param {Array} incomingInfos
+   */
+  // @todo:
+  // - tests
+  // - fix permormance
   findOpened(incomingInfos) {
     return this.find(
       tab => commonRoot(incomingInfos, this._recognize(tab))
     );
-  },
-
-  isEmpty() {
-    return !get(this, 'length');
   }
 });
 
@@ -137,7 +163,7 @@ function extractTabSettingsFromHandlerInfos(handlerInfos) {
   const owner = getOwner(this);
 
   let settingsPerTab = handlerInfos
-    .map((routeHandler) => owner.lookup(`route:${routeHandler.handler}`))
+    .map(routeHandler => owner.lookup(`route:${routeHandler.handler}`))
     .map(readTabSettingsFromRouteHandler)
     .filter(tab => !isEmpty(tab))
     .map(tab => JSON.parse(JSON.stringify(tab)));

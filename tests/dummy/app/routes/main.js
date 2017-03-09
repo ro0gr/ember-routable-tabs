@@ -7,6 +7,7 @@ const {
 
 import routableTabs from '../utils/routable-tabs';
 
+// @todo: mirage
 const activities = [{
   name: "activity 1", customerId: 1
 }, {
@@ -27,15 +28,16 @@ export default Ember.Route.extend({
 
     set(controller, 'tabs', get(this, 'tabs'));
 
-    get(this, 'tabs').assignTab({
+    get(this, 'tabs').attach({
       title: 'Main',
+      sticky: true,
       routeName: this.routeName
     });
   },
 
   actions: {
     didTransition() {
-      get(this, 'tabs').assignTab()
+      get(this, 'tabs').attach()
     }
   }
 });

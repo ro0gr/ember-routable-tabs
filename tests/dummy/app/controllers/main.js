@@ -11,9 +11,8 @@ export default Ember.Controller.extend({
 
 	actions: {
 		closeTab(tab) {
-			const tabs = get(this, 'tabs');
-			tabs.detach(tab);
-			
+			get(this, 'tabs').detach(tab);
+
 			return false;
 		}
 	}

@@ -3,11 +3,15 @@
 		<span class="tab-item__title">
 			{{c.title}}
 		</span>
-		
-		<button	class="tab-item__close"
-			onclick={{action "closeTab" c}}>
-			X
-		</button>
+
+    &nbsp;
+
+    {{#unless c.sticky}}
+      <button	class="tab-item__close"
+        onclick={{action "closeTab" c}}>
+        X
+      </button>
+    {{/unless}}
 	{{/component}}
 {{/routable-tabs}}
 

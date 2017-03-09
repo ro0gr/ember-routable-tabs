@@ -11,6 +11,7 @@ export default Ember.Service.extend({
   containerFor(containerId) {
     if (!this._items[containerId]) {
       this._items[containerId] = TabsContainer.create({
+        'name': containerId,
         content: A([])
       });
       let owner = getOwner(this);
