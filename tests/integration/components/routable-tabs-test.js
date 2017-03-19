@@ -1,34 +1,25 @@
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 
-import { create, collection, text, clickable } from 'ember-cli-page-object';
+import { create } from 'ember-cli-page-object';
 
-const tabs = create({
-	scope: '.routable-tabs',
-	
-    items: collection({
-		itemScope: '.routable-tabs__tab-item',
-		item: {
-			title: text(),
-			click: clickable('a')
-		}
-	}),
+import Tabs from '../../components/tabs';
 
-});
+const tabs = create(Tabs);
 
 moduleForComponent('routable-tabs', 'Integration | Component | routable tabs', {
   integration: true,
-  
+
   beforeEach() {
-		tabs.setContext(this);
+    tabs.setContext(this);
   },
-  
+
   afterEach() {
-		tabs.removeContext(this);
+    tabs.removeContext(this);
   }
 });
 
-test('renders empty tab list', function(assert) {
+test('renders empty tab list', function (assert) {
   this.tabs = []
 
   // Template block usage:
@@ -40,7 +31,7 @@ test('renders empty tab list', function(assert) {
   assert.equal(tabs.items().count, 0);
 });
 
-test('it renders', function(assert) {
+test('it renders', function (assert) {
   this.tabs = [{
     linkParams: ['test'],
     title: 'tab 1'
@@ -59,25 +50,22 @@ test('it renders', function(assert) {
   assert.equal(tabs.items().count, 2);
 });
 
-
-test('it renders contextual tab items', function(assert) {
+test('it renders contextual tab items', function (assert) {
   this.tabs = [{
     linkParams: ['test'],
     title: 'tab 1',
-	status: 'ok'
+    status: 'ok'
   }, {
     linkParams: ['test2'],
     title: 'tab 2',
-	status: 'super-duper!'
+    status: 'super-duper!'
   }]
 
   // Template block usage:
   this.render(hbs`
-    {{#routable-tabs tabs=tabs as |c datum|}}
-		{{#component c}}
+    {{#routable-tabs tabs=tabs as |datum|}}
 			{{datum.title}} - {{datum.status}}
-		{{/component}}
-	{{/routable-tabs}}
+    {{/routable-tabs}}
   `);
 
   assert.equal(tabs.items(0).title, 'tab 1 - ok');

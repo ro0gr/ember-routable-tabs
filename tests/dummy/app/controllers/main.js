@@ -10,7 +10,10 @@ export default Ember.Controller.extend({
 	tabs: routableTabs('main'),
 
 	actions: {
-		closeTab(tab) {
+		closeTab(tab, e) {
+      e.preventDefault();
+      e.stopPropagation();
+
 			get(this, 'tabs').detach(tab);
 
 			return false;

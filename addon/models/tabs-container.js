@@ -45,23 +45,23 @@ export default ArrayProxy.extend({
     if (!existing) {
       this.addObject(navItem);
     } else {
-      // @todo: replace
+      // @todo: replace?
       setProperties(existing, navItem);
     }
   },
 
   detach(tab) {
-    const router = this.get('_routerMicrolib');
+    // const router = this.get('_routerMicrolib');
+    const router = this.get('routing').router;
     const isTabActive = router.isActive.apply(router, tab.linkParams);
     const pos = this.indexOf(tab);
-
     this.removeObject(tab);
 
     if (isTabActive) {
       let prevTab = this.objectAt(pos > 0 ? pos - 1 : pos);
       if (prevTab) {
         router.replaceWith.apply(router, prevTab.linkParams);
-      } else { // all tabs are deleted
+      } else { // all tabs are delete
         router.replaceWith([this.name]);
       }
     }

@@ -1,18 +1,16 @@
-{{#routable-tabs tabs=tabs as |tabItem|}}
-	{{#component tabItem as |c|}}
-		<span class="tab-item__title">
-			{{c.title}}
-		</span>
+{{#routable-tabs tabs=tabs as |c|}}
+  <span class="tab-item__title">
+    {{c.title}}
+  </span>
 
+  {{#unless c.sticky}}
     &nbsp;
 
-    {{#unless c.sticky}}
-      <button	class="tab-item__close"
-        onclick={{action "closeTab" c}}>
-        X
-      </button>
-    {{/unless}}
-	{{/component}}
+    <button	class="tab-item__close"
+      onclick={{action "closeTab" c}}>
+      X
+    </button>
+  {{/unless}}
 {{/routable-tabs}}
 
 {{outlet}}

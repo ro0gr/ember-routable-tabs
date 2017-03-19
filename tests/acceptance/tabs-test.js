@@ -1,4 +1,4 @@
-import { test } from 'qunit';
+import { test, skip } from 'qunit';
 import moduleForAcceptance from '../../tests/helpers/module-for-acceptance';
 
 import {
@@ -8,7 +8,8 @@ import {
   value,
   text,
   collection,
-  clickable
+  clickable,
+  hasClass
 } from 'ember-cli-page-object';
 
 function assertTabs(assert, expectedList) {
@@ -25,16 +26,17 @@ function assertTabs(assert, expectedList) {
   });
 }
 
-let mainPage = create({
+const mainPage = create({
   visit: visitable('/'),
 
   tabs: collection({
     scope: '.routable-tabs',
     itemScope: '.routable-tabs__tab-item',
     item: {
-		title: text('.tab-item__title'),
-		click: clickable('a'),
-		close: clickable('button')
+      title: text('.tab-item__title'),
+      click: clickable('a'),
+      close: clickable('button'),
+      isActive: hasClass('active', 'a')
     }
   }),
 
@@ -48,7 +50,7 @@ let mainPage = create({
   })
 });
 
-let customerPage = create({
+const customerPage = create({
   visit: visitable('customer/:id'),
 
   name: text('.customer-property-name'),
@@ -56,7 +58,7 @@ let customerPage = create({
   clickEdit: clickable('.customer-edit-link')
 });
 
-let customerEditPage = create({
+const customerEditPage = create({
   visit: visitable('customer/:id/edit'),
 
   name: {
@@ -99,16 +101,55 @@ test('click on a tab', function(assert) {
   });
 });
 
+skip('close first tab when active', function() {
+  // @todo: should check that the active tab changed to the next tab
+});
+
+skip('close the last tab', function() {
+  // @todo: should check that there are no tabs rendered
+});
+
+test('close active tab. switches to previous tab', function(assert) {
+  customerPage.visit({id: '1'});
+
+  andThen(() => {
+    assert.ok(mainPage.tabs(1).isActive);
+    mainPage.tabs(1).close();
+  })
+
+  return andThen(() => {
+    assert.ok(mainPage.tabs(0).isActive);
+    assertTabs(assert, [ 'Main' ])
+    assert.equal(currentURL(), '/', 'redirected to main page');
+  })
+});
+
+test('close innactive tab. stays on the same tab', function(assert) {
+  customerPage.visit({id: '1'});
+  customerPage.visit({id: '2'});
+
+  andThen(() => {
+    assert.ok(mainPage.tabs(2).isActive);
+    mainPage.tabs(1).close();
+  })
+
+  return andThen(() => {
+    assert.ok(mainPage.tabs(1).isActive);
+    assertTabs(assert, [ 'Main', 'customer2' ])
+    assert.equal(currentURL(), 'customer/2', 'redirected to main page');
+  })
+});
+
 test('subroute: go back and forth', function(assert) {
   customerPage.visit({id: '1'});
   customerEditPage.visit({id: '1'});
 
   return andThen(() => {
-	assert.equal(mainPage.tabs(1).title, 'customer1 editor', 'tab changed to editor mode')
+    assert.equal(mainPage.tabs(1).title, 'customer1 editor', 'tab changed to editor mode')
 
     customerPage.visit({id: 1});
   }).then(() => {
-	assert.equal(mainPage.tabs(1).title, 'customer1', 'tab restored to view mode')
+    assert.equal(mainPage.tabs(1).title, 'customer1', 'tab restored to view mode')
   });
 });
 

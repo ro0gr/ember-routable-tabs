@@ -19,6 +19,10 @@ const activities = [{
 export default Ember.Route.extend({
   tabs: routableTabs('main'),
 
+  init() {
+    this._tabs = get(this, 'tabs');
+  },
+
   model() {
     return activities;
   },
@@ -26,18 +30,18 @@ export default Ember.Route.extend({
   setupController(controller) {
     this._super(...arguments);
 
-    set(controller, 'tabs', get(this, 'tabs'));
+    set(controller, 'tabs', this._tabs);
 
-    get(this, 'tabs').attach({
+    this._tabs.attach({
       title: 'Main',
       sticky: true,
-      routeName: this.routeName
+      routeName: `${this.routeName}.index`
     });
   },
 
   actions: {
     didTransition() {
-      get(this, 'tabs').attach()
+      this._tabs.attach()
     }
-  }
+   }
 });
