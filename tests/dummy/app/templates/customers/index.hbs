@@ -7,11 +7,11 @@
         {{item.name}}
       </td>
       <td>
-        {{#link-to "main.customer" item.customerId
-          class="main--customer-link"
+        {{#link-to "customer" item.customerId
           id=(concat "customer-link-" item.customerId)
+          class="customers--customer-link"
         }}
-          Customer
+          View
         {{/link-to}}
       </td>
     </tr>

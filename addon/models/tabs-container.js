@@ -21,7 +21,7 @@ export default ArrayProxy.extend({
     return this.get('routing').router.router;
   }),
 
-  _fromCurrent() {
+  activeNavInfo() {
       const currentInfos = get(this, '_routerMicrolib').currentHandlerInfos;
 
       return {
@@ -32,16 +32,20 @@ export default ArrayProxy.extend({
 
   attach(navItem) {
     if (!navItem) {
-      navItem = this._fromCurrent();
+      navItem = this.activeNavInfo();
     }
 
     const incomingInfos = this._recognize(navItem);
-    assign(navItem, extractTabSettingsFromHandlerInfos.call(this, incomingInfos), {
-      linkParams: [ navItem.routeName ]
-        .concat(getParamsValues(incomingInfos))
-    });
+    navItem.linkParams = [ navItem.routeName ].concat(getParamsValues(incomingInfos));
 
-    let existing = this.findOpened(incomingInfos);
+    const navSettings = extractTabSettingsFromHandlerInfos.call(this, incomingInfos);
+
+    assign( navItem, navSettings );
+
+    let existing = this.find(
+      tab => sameResource(incomingInfos, this._recognize(tab))
+    );
+
     if (!existing) {
       this.addObject(navItem);
     } else {
@@ -79,20 +83,6 @@ export default ArrayProxy.extend({
         name: hi.handler
       })
     );
-  },
-
-  /**
-   *
-   *
-   * @param {Array} incomingInfos
-   */
-  // @todo:
-  // - tests
-  // - fix permormance
-  findOpened(incomingInfos) {
-    return this.find(
-      tab => commonRoot(incomingInfos, this._recognize(tab))
-    );
   }
 });
 
@@ -108,7 +98,7 @@ function lastIndexWithParams(handlerInfos) {
   return i;
 }
 
-function commonRoot(handlerInfos1, handlerInfos2) {
+function sameResource(handlerInfos1, handlerInfos2) {
   let lastIndexWithParams1 = lastIndexWithParams(handlerInfos1),
     lastIndexWithParams2 = lastIndexWithParams(handlerInfos2);
 
@@ -155,7 +145,8 @@ function readTabSettingsFromRouteHandler(routeHandler) {
   let tab = get(routeHandler, 'tab');
 
   return typeof tab === 'function' ?
-    tab.call(routeHandler, routeHandler.context) :
+    // tab.call(routeHandler, routeHandler.context) :
+    tab.call(routeHandler, routeHandler.controller.model) :
     tab;
 }
 
@@ -164,6 +155,7 @@ function extractTabSettingsFromHandlerInfos(handlerInfos) {
 
   let settingsPerTab = handlerInfos
     .map(routeHandler => owner.lookup(`route:${routeHandler.handler}`))
+    .filter(handler => !isEmpty(handler))
     .map(readTabSettingsFromRouteHandler)
     .filter(tab => !isEmpty(tab))
     .map(tab => JSON.parse(JSON.stringify(tab)));

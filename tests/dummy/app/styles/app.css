@@ -1,0 +1,6 @@
+.routable-tabs__tab_item a {
+  color: #00c;
+}
+.routable-tabs__tab_item a.active {
+  color: #009;
+}

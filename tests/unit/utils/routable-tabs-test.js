@@ -1,4 +1,4 @@
-import routableTabs from 'dummy/utils/routable-tabs';
+import routableTabs from 'ember-routable-tabs/utils/routable-tabs';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | routable tabs');

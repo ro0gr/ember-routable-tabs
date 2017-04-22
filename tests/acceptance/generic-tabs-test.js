@@ -71,7 +71,21 @@ const customerEditPage = create({
   clickBack: clickable('.back-link')
 });
 
-moduleForAcceptance('Acceptance | basic');
+import AppRouter from 'dummy/router';
+
+moduleForAcceptance('Acceptance | dynamic', {
+  beforeEach() {
+    AppRouter.map(function() {
+      // this.route('main', { path: '/' }, function() {
+      //   this.route('accounts', function() {
+      //     this.route('add');
+      //     this.route('view', { path: 'view/:id' });
+      //     this.route('edit', { path: 'edit/:id' });
+      //   });
+      // });
+    });
+  }
+});
 
 // @todo: check is active
 test('Opens predefined main tab', function(assert) {
